@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Header from '../Header/page';
 
-export default function Feadback() {
+export default function Feedback() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
