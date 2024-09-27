@@ -203,8 +203,8 @@ export default function Home() {
   return (
     <div>
       <Header />
-      <div className="antialiased text-center text-gray-700 pt-[80px]  ">
-        <h2 className=" font-bold text-[50px]">ONLINE TUTORING</h2>
+      <div className="antialiased text-center text-red-700 pt-[80px]  ">
+        <h2 className=" font-bold text-[50px]">Meet Someone</h2>
 
         <div className="flex flex-col md:flex-row items-center justify-center">
           <span>
@@ -227,11 +227,11 @@ export default function Home() {
 
         <button
           onClick={handleWebcamButtonClick}
-          className="bg-[#0070f0] w-[180px] h-[40px] rounded-xl block mx-auto md:ml-[140px]"
+          className="bg-red-500 w-[180px] h-[40px] rounded-xl block mx-auto md:ml-[140px]"
           disabled={webcamButtonDisabled}
           color="primary"
         >
-          <p className="text-white font-semibold"> Start Webcam</p>
+          <p className="text-white font-semibold"> Start to meet</p>
         </button>
         <button
           onClick={() => setCallInputValue(latestCallDocId)}
