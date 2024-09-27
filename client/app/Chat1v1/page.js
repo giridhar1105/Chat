@@ -5,7 +5,7 @@ import axios from 'axios';
 import Header from "../Header/page"; // Ensure this path is correct
 
 export default function Chat1v1() {
-    const [greetings, setGreetings] = useState([
+    const [greetings] = useState([
         "Hi", "Hii", "Hiii", "Hiiii", "Hiiiii",
         "Hiiiiii", "Hiiiiiii", "Hiiiiiiii", "Hiiiiiiiii", "Hiiiiiiiiii"
     ]);
@@ -30,7 +30,7 @@ export default function Chat1v1() {
 
             try {
                 await axios.post('/api/messages/send', { senderId, receiverId, content: message });
-                setSentMessages([...sentMessages, { sender: senderId, content: message }]);
+                setSentMessages((prevMessages) => [...prevMessages, { sender: senderId, content: message }]);
                 setMessage("");
             } catch (error) {
                 console.error('Error sending message:', error);
@@ -116,21 +116,6 @@ export default function Chat1v1() {
                         </div>
                     </div>
                 )}
-
-                <div className="mt-16 w-full flex flex-col">
-                    <h3 className="text-white">Request OTP</h3>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        className="border rounded p-2 mb-2"
-                    />
-                    <button onClick={sendOtp} className="bg-blue-500 text-white rounded px-4 py-2">
-                        Send OTP
-                    </button>
-                    {isOtpSent && <p className="text-green-500">OTP sent successfully!</p>}
-                </div>
             </div>
         </>
     );
