@@ -13,37 +13,34 @@ export default function AIChat() {
     const handleSendMessage = async () => {
         if (message.trim()) {
             const userMessage = message;
-            // Update UI with user message
             setMessages(prevMessages => [...prevMessages, { text: userMessage, sender: 'user' }]);
-            setMessage(""); // Clear input field
-            setError(""); // Clear any previous error
+            setMessage(""); 
+            setError(""); 
 
-            setLoading(true); // Start loading state
+            setLoading(true);
             try {
-                // Send message as JSON
                 const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/message`, { 
                     message: userMessage 
                 }, {
                     headers: {
-                        'Content-Type': 'application/json' // Ensure the content type is JSON
+                        'Content-Type': 'application/json'
                     }
                 });
-                const aiResponse = response.data.response; // Get AI response from the response
-                // Update UI with AI response
+                const aiResponse = response.data.response;
                 setMessages(prevMessages => [...prevMessages, { text: aiResponse, sender: 'ai' }]);
             } catch (err) {
-                setError("Error fetching AI response."); // Handle errors
+                setError("Error fetching AI response.");
             } finally {
-                setLoading(false); // End loading state
+                setLoading(false);
             }
         } else {
-            setError("Message cannot be empty."); // Handle empty message error
+            setError("Message cannot be empty.");
         }
     };
 
     const handleClearMessages = () => {
         if (window.confirm("Are you sure you want to clear all messages?")) {
-            setMessages([]); // Clear messages
+            setMessages([]);
         }
     };
 
@@ -53,7 +50,11 @@ export default function AIChat() {
             <div className="pt-16 flex flex-col">
                 <div className="flex-1 p-4 bg-gray-100 overflow-y-auto">
                     {messages.map((msg, index) => (
-                        <div key={index} className={`p-2 rounded mb-2 self-${msg.sender === 'user' ? 'end' : 'start'} bg-${msg.sender === 'user' ? 'gray-300' : 'blue-300'}`}>
+                        <div 
+                            key={index} 
+                            className={`p-2 rounded mb-2 self-${msg.sender === 'user' ? 'end' : 'start'} 
+                            bg-${msg.sender === 'user' ? 'gray-300' : 'blue-300'} 
+                            animate-fade-in transition-all duration-300`}>
                             {msg.text}
                         </div>
                     ))}
@@ -67,7 +68,7 @@ export default function AIChat() {
                     <input
                         type="text"
                         value={message}
-                        maxLength={200} // Character limit
+                        maxLength={200}
                         onChange={({ target: { value } }) => setMessage(value)}
                         placeholder="Type your message here..."
                         className="flex-grow h-10 border rounded p-2 text-white bg-gray-800 placeholder-gray-400"
