@@ -49,7 +49,7 @@ const Header = () => {
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex flex-grow items-center justify-center gap-8">
-          {["/Chat1v1", "/Search", "/GroupChat", "/AIChat", "/VideoCall", "/Feedback", "/Profile"].map((path, index) => (
+          {["/Chat1v1", "/Search", "/GroupChat", "/AIChat", "/Videocall", "/Feedback", "/Profile"].map((path, index) => (
             <button key={index} className="hover:text-red-500" onClick={() => router.push(path)}>
               {path.split('/')[1] || 'Home'}
             </button>

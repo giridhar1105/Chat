@@ -18,7 +18,7 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 
-export default function Home() {
+export default function Videocall() {
   let [localStream, setLocalStream] = useState(null);
   let [remoteStream, setRemoteStream] = useState(null);
   const [latestCallDocId, setLatestCallDocId] = useState("");
