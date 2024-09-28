@@ -1,6 +1,10 @@
 "use client";
 import Header from "../Header/page";
 import firebase from "firebase/compat/app";
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
 
 import { useEffect, useState, useRef } from "react";
 import "firebase/compat/firestore";
@@ -38,13 +42,13 @@ export default function Home() {
 
   useEffect(() => {
     const firebaseConfig = {
-      // your config
-      apiKey: "",
-      authDomain: "",
-      projectId: "chat-ib",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: "",
+      apiKey: "AIzaSyBFbnsALbCr55a5ivsG6ngBg5IAPIysJrs",
+      authDomain: "fir-rtc-a408e.firebaseapp.com",
+      projectId: "fir-rtc-a408e",
+      storageBucket: "fir-rtc-a408e.appspot.com",
+      messagingSenderId: "607804021954",
+      appId: "1:607804021954:web:76f0bbb70b4a74e0d2af5b",
+      measurementId: "G-41NSERZHCT"
     };
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
