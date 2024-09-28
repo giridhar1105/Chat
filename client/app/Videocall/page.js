@@ -41,14 +41,14 @@ export default function Videocall() {
   };
 
   useEffect(() => {
-    const firebaseConfig = {
-      apiKey: "AIzaSyBFbnsALbCr55a5ivsG6ngBg5IAPIysJrs",
-      authDomain: "fir-rtc-a408e.firebaseapp.com",
-      projectId: "fir-rtc-a408e",
-      storageBucket: "fir-rtc-a408e.appspot.com",
-      messagingSenderId: "607804021954",
-      appId: "1:607804021954:web:76f0bbb70b4a74e0d2af5b",
-      measurementId: "G-41NSERZHCT"
+      const firebaseConfig = {
+      apiKey: "AIzaSyDElj3RiaMdreLxGzH2fS_UTtowyNg0s9g",
+      authDomain: "videocall-1806e.firebaseapp.com",
+      projectId: "videocall-1806e",
+      storageBucket: "videocall-1806e.appspot.com",
+      messagingSenderId: "1013676363252",
+      appId: "1:1013676363252:web:2b7e0b02d4e959014e3da1",
+      measurementId: "G-GZ04BXE9L8"
     };
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
