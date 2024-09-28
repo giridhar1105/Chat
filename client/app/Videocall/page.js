@@ -75,11 +75,8 @@ export default function Home() {
         });
       });
 
-    // Clean up the listener when the component unmounts
     return () => unsubscribe();
   }, [firestore.current]);
-
-  // 1. Setup media sources
 
   let handleWebcamButtonClick = async () => {
     const localStream = await navigator.mediaDevices.getUserMedia({
@@ -93,7 +90,6 @@ export default function Home() {
     setRemoteStream(remoteMediaStream);
     console.log(localStream);
 
-    // Push tracks from local stream to peer connection
     localStream.getTracks().forEach((track) => {
       pc.addTrack(track, localStream);
     });
