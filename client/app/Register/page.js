@@ -1,179 +1,102 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { FaMale, FaFemale } from "react-icons/fa"; // Importing icons 
+import React, { useEffect, useState } from 'react';
+import Header from '../Header/page';
 
-function Register() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [gender, setGender] = useState("Male");
-  const [email, setEmail] = useState(""); 
-  const [otp, setOtp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const router = useRouter();
+export default function Profile() {
+  const [user, setUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  async function onRegister(e) {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const data = { username, password, gender, email, otp };
-      const response = await fetch("http://localhost:3000/register", {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (response.status === 201) {
-        setUsername("");
-        setPassword("");
-        setGender("Male");
-        setEmail("");
-        setOtp("");
-        window.alert("Registration successful!");
-        router.push("/Login");
-      } else {
-        window.alert("Registration failed. Please try again.");
-      }
-    } catch (err) {
-      console.error("Registration error:", err.message);
-      window.alert("An error occurred. Please try again later.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Fetch user data from local storage
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setUser({ ...storedUser, bio: '', height: '', weight: '', interests: [] });
     }
-  }
+  }, []);
 
-  const handleSendOtp = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/send-otp", {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      if (response.ok) {
-        setOtpSent(true);
-        window.alert("OTP sent to your email address.");
-      } else {
-        window.alert("Failed to send OTP. Please try again.");
-      }
-    } catch (err) {
-      console.error("Error sending OTP:", err.message);
-      window.alert("An error occurred while sending the OTP. Please try again later.");
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser({
+      ...user,
+      [name]: value,
+    });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Update user data in local storage
+    localStorage.setItem("user", JSON.stringify(user));
+    console.log("Updated User:", user);
+    setIsEditing(false);
+  };
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
-      <motion.div
-        className="flex items-center justify-center w-full bg-black cursor-pointer font-bold text-red-500 py-2 text-5xl"
-        onClick={() => router.push("/")}>
-        Chat-IB
-      </motion.div>
-      <div className="bg-black flex items-center justify-center h-screen">
-        <motion.div
-          className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-center font-bold mb-6 text-3xl text-red-500">Register</h1>
-          <form onSubmit={onRegister}>
-            <div className="mb-4">
-              <label htmlFor="username" className="block text-sm font-medium text-red-400">Username</label>
-              <motion.input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 p-4 text-lg w-full border rounded-md border-gray-600 bg-gray-900 text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm transition-shadow duration-300"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-red-400 mb-2">Gender</label>
-              <div className="flex items-center justify-around">
-                <motion.label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="Male"
-                    checked={gender === "Male"}
-                    onChange={() => setGender("Male")}
-                    className="mr-2"
-                  />
-                  <FaMale className="text-red-400 text-2xl" />
-                  <span className="ml-1 text-lg text-red-400">Male</span>
-                </motion.label>
-                <motion.label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="Female"
-                    checked={gender === "Female"}
-                    onChange={() => setGender("Female")}
-                    className="mr-2"
-                  />
-                  <FaFemale className="text-red-400 text-2xl" />
-                  <span className="ml-1 text-lg text-red-400">Female</span>
-                </motion.label>
-              </div>
-            </div>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-red-400">Email Address</label>
-              <motion.input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 p-4 text-lg w-full border rounded-md border-gray-600 bg-gray-900 text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm transition-shadow duration-300"
-                placeholder="example@example.com"
-              />
-              <motion.button
-                type="button"
-                onClick={handleSendOtp}
-                className="mt-2 bg-red-500 text-white p-2 w-full rounded-md hover:bg-red-600 transition-transform duration-300"
-              >
-                Get OTP
-              </motion.button>
-            </div>
-            {otpSent && (
-              <div className="mb-6">
-                <label htmlFor="otp" className="block text-sm font-medium text-red-400">OTP</label>
-                <motion.input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="mt-1 p-4 text-lg w-full border rounded-md border-gray-600 bg-gray-900 text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm transition-shadow duration-300"
-                  placeholder="Enter OTP"
+    <div className="bg-black min-h-screen flex flex-col">
+      <Header className="fixed top-0 left-0 right-0 z-10" />
+      <div className="flex-grow flex items-center justify-center mt-16">
+        <div className="max-w-sm mx-auto p-6 bg-white rounded-lg shadow-lg">
+          <h1 className="text-2xl font-semibold text-center text-black">{user.username}</h1>
+          <p className="text-gray-700 text-center mt-2">{user.bio}</p>
+
+          <h2 className="mt-4 text-gray-400 text-lg font-semibold">Interests</h2>
+          <ul className="list-disc list-inside mt-2">
+            {user.interests.map((interest, index) => (
+              <li key={index} className="text-gray-600">{interest}</li>
+            ))}
+          </ul>
+
+          <button 
+            onClick={() => setIsEditing(true)} 
+            className="mt-6 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition duration-200"
+          >
+            Edit Profile
+          </button>
+
+          {isEditing && (
+            <form onSubmit={handleSubmit} className="mt-4">
+              <div className="mb-2">
+                <input 
+                  type="text" 
+                  name="name" 
+                  value={user.name || ''} 
+                  onChange={handleChange} 
+                  className="w-full p-2 border rounded" 
+                  placeholder="Name" 
                 />
               </div>
-            )}
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-red-400">Password</label>
-              <motion.input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 p-4 text-lg w-full border rounded-md border-gray-600 bg-gray-900 text-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 shadow-sm transition-shadow duration-300"
-              />
-            </div>
-            <motion.button
-              type="submit"
-              disabled={loading}
-              className={`bg-red-500 text-white p-3 w-full rounded-md mt-5 ${
-                loading ? "bg-red-300 cursor-not-allowed" : "hover:bg-red-600"
-              } shadow-md transition-transform duration-300 ${!loading ? "hover:scale-105" : ""}`}
-            >
-              {loading ? "Registering..." : "Register"}
-            </motion.button>
-          </form>
-        </motion.div>
+              <div className="mb-2">
+                <input 
+                  type="number" 
+                  name="age" 
+                  value={user.age || ''} 
+                  onChange={handleChange} 
+                  className="w-full p-2 border rounded" 
+                  placeholder="Age" 
+                />
+              </div>
+              {/* Other input fields here... */}
+              <button 
+                type="submit" 
+                className="mt-4 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition duration-200"
+              >
+                Save Changes
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setIsEditing(false)} 
+                className="mt-2 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600 transition duration-200"
+              >
+                Cancel
+              </button>
+            </form>
+          )}
+        </div>
       </div>
-    </>
+    </div>
   );
 }
-
-export default Register;
