@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const OpenAI = require('openai'); // Import the OpenAI SDK
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -56,43 +56,37 @@ app.post('/send-otp', (req, res) => {
     });
 });
 
-// Create an instance of OpenAI with the API key
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Endpoint to handle AI chat messages using OpenAI SDK
-app.post('/api/message', async (req, res) => {
+// OpenAI API endpoint
+app.post('/chat', async (req, res) => {
     const { message } = req.body;
-
-    if (!message) {
-        return res.status(400).json({ error: "Message cannot be empty." });
-    }
+    
+    const data = {
+        model: "gpt-3.5-turbo-0125",
+        messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: message }
+        ]
+    };
 
     try {
-        // Call OpenAI API using the SDK
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                { role: "user", content: message }
-            ]
+        const response = await axios.post('https://api.openai.com/v1/chat/completions', data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` // Make sure to set this in your .env file
+            }
         });
-
-        const aiResponse = completion.choices[0].message.content;
-        return res.json({ response: aiResponse });
+        res.status(200).json({ response: response.data.choices[0].message.content });
     } catch (error) {
-        console.error('Error calling OpenAI API:', error);
-        return res.status(500).json({ error: 'Error fetching AI response.' });
+        console.error('Error:', error.response ? error.response.data : error.message);
+        res.status(500).json({ message: 'Error communicating with OpenAI', error: error.response ? error.response.data : error.message });
     }
 });
 
-// Routes for authentication and messaging
+// Routes for authentication
 const authRoutes = require('./routes/auth');
-const messageRoutes = require('./routes/messages');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/messages', messageRoutes);
 
 // Start the server
 app.listen(PORT, () => {
