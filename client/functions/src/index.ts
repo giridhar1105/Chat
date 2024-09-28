@@ -4,11 +4,6 @@ import * as z from "zod";
 import {generate} from "@genkit-ai/ai";
 import {configureGenkit} from "@genkit-ai/core";
 import {firebase} from "@genkit-ai/firebase";
-import {googleAI} from "@genkit-ai/googleai";
-
-// Import models from the Google AI plugin. The Google AI API provides access to
-// several generative models. Here, we import Gemini 1.5 Flash.
-import {gemini15Flash} from "@genkit-ai/googleai";
 
 // From the Firebase plugin, import the functions needed to deploy flows using
 // Cloud Functions.
@@ -20,11 +15,6 @@ configureGenkit({
     // Load the Firebase plugin, which provides integrations with several
     // Firebase services.
     firebase(),
-    // Load the Google AI plugin. You can optionally specify your API key
-    // by passing in a config object; if you don't, the Google AI plugin uses
-    // the value from the GOOGLE_GENAI_API_KEY environment variable, which is
-    // the recommended practice.
-    googleAI(),
   ],
   // Log debug output to tbe console.
   logLevel: "debug",
@@ -58,7 +48,7 @@ export const menuSuggestionFlow = onFlow(
     const prompt =
       `Suggest an item for the menu of a ${subject} themed restaurant`;
     const llmResponse = await generate({
-      model: gemini15Flash,
+      model: '' /* TODO: Set a model. */,
       prompt: prompt,
       config: {
         temperature: 1,

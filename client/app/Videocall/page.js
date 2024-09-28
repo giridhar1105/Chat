@@ -48,7 +48,7 @@ export default function Videocall() {
       storageBucket: "videocall-1806e.appspot.com",
       messagingSenderId: "1013676363252",
       appId: "1:1013676363252:web:2b7e0b02d4e959014e3da1",
-      measurementId: "G-GZ04BXE9L8"
+      measurementId: "G-GZ04BXE9L8",
     };
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
