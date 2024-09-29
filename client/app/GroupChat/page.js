@@ -1,16 +1,33 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from "../Header/page"; // Ensure this path is correct
 
 export default function GroupChat() {
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [ws, setWs] = useState(null);
+
+    useEffect(() => {
+        // Connect to WebSocket server
+        const websocket = new WebSocket('ws://localhost:8080');
+
+        websocket.onmessage = (event) => {
+            setMessages(prevMessages => [...prevMessages, event.data]);
+        };
+
+        setWs(websocket);
+
+        // Clean up on component unmount
+        return () => {
+            websocket.close();
+        };
+    }, []);
 
     const handleSendMessage = () => {
         if (message.trim()) {
-            setMessages([...messages, message]);
+            ws.send(message);
             console.log(`Message sent: ${message}`);
             setMessage("");
             setError(""); // Clear error if message is sent
