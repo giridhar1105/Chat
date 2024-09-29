@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const axios = require('axios');
+const WebSocket = require('ws');
 require('dotenv').config();
 
 const app = express();
@@ -12,10 +13,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
+// Nodemailer setup
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -24,7 +27,43 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-let messages = [];
+// WebSocket server setup
+const wss = new WebSocket.Server({ noServer: true });
+let clients = [];
+
+// Handle WebSocket connection
+wss.on('connection', (ws) => {
+    clients.push(ws);
+    console.log('New client connected');
+
+    ws.on('message', (message) => {
+        console.log(`Received: ${message}`);
+        // Broadcast the message to all clients
+        clients.forEach(client => {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
+        });
+    });
+
+    ws.on('close', () => {
+        console.log('Client disconnected');
+        clients = clients.filter(client => client !== ws);
+    });
+});
+
+// Upgrade HTTP server to handle WebSocket requests
+const server = app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+    });
+});
+
+// API routes
 
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -67,7 +106,13 @@ app.post('/api/messages/send', (req, res) => {
         timestamp: new Date().toISOString(),
     };
 
-    messages.push(message);
+    // Broadcast message to WebSocket clients
+    clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(message));
+        }
+    });
+
     return res.status(200).json(message);
 });
 
@@ -98,7 +143,7 @@ app.post('/chat', async (req, res) => {
         const response = await axios.post('https://api.openai.com/v1/chat/completions', data, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` // Make sure to set this in your .env file
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
             }
         });
         res.status(200).json({ response: response.data.choices[0].message.content });
@@ -106,11 +151,4 @@ app.post('/chat', async (req, res) => {
         console.error('Error:', error.response ? error.response.data : error.message);
         res.status(500).json({ message: 'Error communicating with OpenAI', error: error.response ? error.response.data : error.message });
     }
-});
-
-// const authRoutes = require('./routes/auth');
-// app.use('/api/auth', authRoutes);
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });
