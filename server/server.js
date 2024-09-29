@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const axios = require('axios');
 const WebSocket = require('ws');
+const http = require('http'); // Add this line to import the http module
 require('dotenv').config();
 
 const app = express();
@@ -28,53 +29,86 @@ const transporter = nodemailer.createTransport({
 });
 
 // WebSocket server setup
-const wss = new WebSocket.Server({ noServer: true });
-let clients = [];
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-// Handle WebSocket connection
+const rooms = {}; // Store rooms by ID
+let clients = []; // Store WebSocket clients
+
+// Function to create a unique room ID
+const generateRoomId = (user1, user2) => {
+    return user1 < user2 ? `${user1}:${user2}` : `${user2}:${user1}`;
+};
+
+// Handle WebSocket connections
 wss.on('connection', (ws) => {
+    let currentRoomId;
+    let currentUserId;
+
     clients.push(ws);
     console.log('New client connected');
 
     ws.on('message', (message) => {
-        console.log(`Received: ${message}`);
-        // Broadcast the message to all clients
-        clients.forEach(client => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
+        const data = JSON.parse(message);
+
+        switch (data.type) {
+            case 'join':
+                currentUserId = data.userId;
+                currentRoomId = generateRoomId(data.userId1, data.userId2);
+
+                // Add user to room
+                if (!rooms[currentRoomId]) {
+                    rooms[currentRoomId] = [];
+                }
+                rooms[currentRoomId].push(ws);
+
+                ws.send(JSON.stringify({ type: 'joined', roomId: currentRoomId }));
+                break;
+
+            case 'message':
+                // Broadcast the message to all clients in the room
+                if (currentRoomId) {
+                    const messageData = {
+                        type: 'message',
+                        sender: currentUserId,
+                        content: data.content,
+                    };
+                    rooms[currentRoomId].forEach(client => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify(messageData));
+                        }
+                    });
+                }
+                break;
+
+            case 'leave':
+                // Remove user from room
+                if (currentRoomId && rooms[currentRoomId]) {
+                    rooms[currentRoomId] = rooms[currentRoomId].filter(client => client !== ws);
+                    if (rooms[currentRoomId].length === 0) {
+                        delete rooms[currentRoomId];
+                    }
+                }
+                break;
+        }
     });
 
     ws.on('close', () => {
         console.log('Client disconnected');
         clients = clients.filter(client => client !== ws);
-    });
-});
-
-// Upgrade HTTP server to handle WebSocket requests
-const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request);
+        
+        if (currentRoomId && rooms[currentRoomId]) {
+            rooms[currentRoomId] = rooms[currentRoomId].filter(client => client !== ws);
+            if (rooms[currentRoomId].length === 0) {
+                delete rooms[currentRoomId];
+            }
+        }
     });
 });
 
 // API routes
-
-const generateOtp = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-};
-
-let otps = {};
-let otpTimestamps = {};
-
 app.post('/send-otp', (req, res) => {
     const { email } = req.body;
-
     const otp = generateOtp();
     otps[email] = otp;
     otpTimestamps[email] = Date.now();
@@ -151,4 +185,9 @@ app.post('/chat', async (req, res) => {
         console.error('Error:', error.response ? error.response.data : error.message);
         res.status(500).json({ message: 'Error communicating with OpenAI', error: error.response ? error.response.data : error.message });
     }
+});
+
+// Start the server
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

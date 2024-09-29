@@ -11,7 +11,7 @@ export default function GroupChat() {
 
     useEffect(() => {
         // Connect to WebSocket server
-        const websocket = new WebSocket('ws://localhost:8080');
+        const websocket = new WebSocket('ws://localhost:3000');
 
         websocket.onmessage = (event) => {
             setMessages(prevMessages => [...prevMessages, event.data]);
