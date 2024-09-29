@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Header from "../Header/page"; // Ensure this path is correct
+import Profile from "../Profile/page"; // Ensure this path is correct
 
 export default function Chat1v1() {
     const [greetings] = useState([
@@ -62,38 +63,42 @@ export default function Chat1v1() {
     return (
         <>
             <Header />
-            <div className="flex">
-                <div className="mt-16 w-2/3">
+            <div className="flex justify-center mt-16">
+                {/* Messaging Buttons */}
+                <div className="w-2/3 flex flex-col items-center">
                     {greetings.map((greeting, index) => (
                         <button
                             key={index}
                             onClick={() => handleButtonClick(greeting)}
-                            className="relative ml-10 pl-5 h-16 w-64 bg-red-500 text-white rounded cursor-pointer flex flex-col items-start justify-start mt-0 transition hover:bg-red-600"
+                            className="relative mb-2 h-16 w-full bg-red-500 text-white rounded cursor-pointer flex items-center justify-between pl-5 pr-2 transition hover:bg-red-600"
                             aria-label={`Select greeting: ${greeting}`}
                         >
                             <div className="flex items-center">
-                                <img
-                                    src="https://img.freepik.com/free-vector/black-valentine-s-day-blurred-background-with-red-hearts_23-2148385374.jpg?t=st=1727145049~exp=1727148649~hmac=2935b0c5e5bccf5993e9df56212fc305e4e744247724fb6d984470df32c91284&w=996"
-                                    alt="Greeting icon"
-                                    className="rounded h-10 w-10 mr-2"
-                                />
-                                <span className="ml-2">{greeting}</span>
+                                <span>{greeting}</span>
                             </div>
-                            <span className="ml-2 text-sm">Some additional text</span>
-                            <span className="absolute top-2 right-2 text-sm">00:00</span>
+                            <span className="text-sm">00:00</span>
                         </button>
                     ))}
                 </div>
 
+                {/* Profile Section */}
+                <div className="w-1/3 flex justify-center items-center">
+                    <Profile />
+                </div>
+
+                {/* Messaging Tab */}
                 {showMessagingTab && (
-                    <div className="mt-16 w-1/3 ml-5 bg-black border rounded p-4 flex flex-col">
+                    <div className="w-1/3 ml-5 bg-black border rounded p-4 flex flex-col">
                         <div className="mb-4 p-4 text-center text-white bg-gray-800 rounded">
                             <h2 className="text-lg font-bold">{selectedGreeting}</h2>
                         </div>
                         <div className="flex flex-col mb-4">
                             {sentMessages.map((msg, idx) => (
                                 <div key={idx} className={`text-white p-2 rounded mb-2 ${msg.sender === 'yourSenderId' ? 'bg-gray-700 self-end' : 'bg-gray-600 self-start'}`}>
-                                    {msg.content}
+                                    <div className="flex justify-between">
+                                        <span>{msg.content}</span>
+                                        <span className="text-sm text-gray-400">10:00</span> {/* Example timestamp */}
+                                    </div>
                                 </div>
                             ))}
                         </div>
