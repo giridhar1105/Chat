@@ -27,13 +27,16 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-let otps = {};
-let otpTimestamps = {};
+// In-memory store for messages
+let messages = [];
 
 // Function to generate OTP
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
+
+let otps = {};
+let otpTimestamps = {};
 
 // Endpoint to send OTP
 app.post('/send-otp', (req, res) => {
@@ -56,10 +59,42 @@ app.post('/send-otp', (req, res) => {
     });
 });
 
+// Endpoint to send a message
+app.post('/api/messages/send', (req, res) => {
+    const { senderId, receiverId, content } = req.body;
+
+    if (!senderId || !receiverId || !content) {
+        return res.status(400).json({ error: 'Invalid message data' });
+    }
+
+    const message = {
+        sender: senderId,
+        receiver: receiverId,
+        content,
+        timestamp: new Date().toISOString(),
+    };
+
+    messages.push(message);
+    return res.status(200).json(message);
+});
+
+// Endpoint to fetch messages between two users
+app.get('/api/messages/chat/:userId1/:userId2', (req, res) => {
+    const { userId1, userId2 } = req.params;
+
+    const chatMessages = messages.filter(
+        msg =>
+            (msg.sender === userId1 && msg.receiver === userId2) ||
+            (msg.sender === userId2 && msg.receiver === userId1)
+    );
+
+    return res.status(200).json(chatMessages);
+});
+
 // OpenAI API endpoint
 app.post('/chat', async (req, res) => {
     const { message } = req.body;
-    
+
     const data = {
         model: "gpt-3.5-turbo-0125",
         messages: [
@@ -82,11 +117,9 @@ app.post('/chat', async (req, res) => {
     }
 });
 
-// Routes for authentication
-const authRoutes = require('./routes/auth');
-
-// Use Routes
-app.use('/api/auth', authRoutes);
+// Routes for authentication (if applicable)
+// const authRoutes = require('./routes/auth');
+// app.use('/api/auth', authRoutes);
 
 // Start the server
 app.listen(PORT, () => {

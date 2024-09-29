@@ -1,27 +1,40 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import Header from "../Header/page"; // Ensure this path is correct
 import Profile from "../Profile/page"; // Ensure this path is correct
 
+const userProfiles = {
+    "Alice": { name: "Alice", age: 25, email: "alice@example.com" },
+    "Bob": { name: "Bob", age: 30, email: "bob@example.com" },
+    "Charlie": { name: "Charlie", age: 22, email: "charlie@example.com" },
+    "Diana": { name: "Diana", age: 28, email: "diana@example.com" },
+    "Eve": { name: "Eve", age: 27, email: "eve@example.com" },
+    "Frank": { name: "Frank", age: 29, email: "frank@example.com" },
+    "Grace": { name: "Grace", age: 26, email: "grace@example.com" },
+    "Hannah": { name: "Hannah", age: 31, email: "hannah@example.com" },
+    "Ian": { name: "Ian", age: 24, email: "ian@example.com" },
+    "Jack": { name: "Jack", age: 32, email: "jack@example.com" },
+};
+
+const getUserProfile = (name) => {
+    return userProfiles[name] || { name: "Unknown", age: null, email: "unknown@example.com" };
+};
+
 export default function Chat1v1() {
-    const [greetings] = useState([
-        "Hi", "Hii", "Hiii", "Hiiii", "Hiiiii",
-        "Hiiiiii", "Hiiiiiii", "Hiiiiiiii", "Hiiiiiiiii", "Hiiiiiiiiii"
-    ]);
+    const [userNames] = useState(Object.keys(userProfiles)); // List of user names
     const [showMessagingTab, setShowMessagingTab] = useState(false);
-    const [selectedGreeting, setSelectedGreeting] = useState("");
+    const [selectedUser, setSelectedUser] = useState("");
     const [message, setMessage] = useState("");
     const [sentMessages, setSentMessages] = useState([]);
-    const [email, setEmail] = useState("");
-    const [otp, setOtp] = useState("");
-    const [isOtpSent, setIsOtpSent] = useState(false);
+    const [currentProfile, setCurrentProfile] = useState({});
 
-    const handleButtonClick = (text) => {
-        setSelectedGreeting(text);
+    const handleButtonClick = (name) => {
+        setSelectedUser(name);
         setShowMessagingTab(true);
-        fetchMessages(); // Fetch messages when greeting is selected
+        setCurrentProfile(getUserProfile(name)); // Set current profile based on name
+        fetchMessages(); // Fetch messages when a user is selected
     };
 
     const handleSendMessage = async () => {
@@ -51,46 +64,37 @@ export default function Chat1v1() {
         }
     };
 
-    const sendOtp = async () => {
-        try {
-            await axios.post('/send-otp', { email });
-            setIsOtpSent(true);
-        } catch (error) {
-            console.error('Error sending OTP:', error);
-        }
-    };
-
     return (
         <>
             <Header />
             <div className="flex justify-center mt-16">
-                {/* Messaging Buttons */}
+                {/* Profile Section */}
+                <div className="w-1/3 flex justify-center items-center">
+                    <Profile user={currentProfile} />
+                </div>
+
+                {/* User Buttons */}
                 <div className="w-2/3 flex flex-col items-center">
-                    {greetings.map((greeting, index) => (
+                    {userNames.map((name, index) => (
                         <button
                             key={index}
-                            onClick={() => handleButtonClick(greeting)}
+                            onClick={() => handleButtonClick(name)}
                             className="relative mb-2 h-16 w-full bg-red-500 text-white rounded cursor-pointer flex items-center justify-between pl-5 pr-2 transition hover:bg-red-600"
-                            aria-label={`Select greeting: ${greeting}`}
+                            aria-label={`Select user: ${name}`}
                         >
                             <div className="flex items-center">
-                                <span>{greeting}</span>
+                                <span>{name}</span>
                             </div>
                             <span className="text-sm">00:00</span>
                         </button>
                     ))}
                 </div>
 
-                {/* Profile Section */}
-                <div className="w-1/3 flex justify-center items-center">
-                    <Profile />
-                </div>
-
                 {/* Messaging Tab */}
                 {showMessagingTab && (
                     <div className="w-1/3 ml-5 bg-black border rounded p-4 flex flex-col">
                         <div className="mb-4 p-4 text-center text-white bg-gray-800 rounded">
-                            <h2 className="text-lg font-bold">{selectedGreeting}</h2>
+                            <h2 className="text-lg font-bold">{selectedUser}</h2>
                         </div>
                         <div className="flex flex-col mb-4">
                             {sentMessages.map((msg, idx) => (
