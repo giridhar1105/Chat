@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const axios = require('axios');
 const WebSocket = require('ws');
-const http = require('http'); // Add this line to import the http module
+const http = require('http');
 require('dotenv').config();
 
 const app = express();
@@ -34,6 +34,9 @@ const wss = new WebSocket.Server({ server });
 
 const rooms = {}; // Store rooms by ID
 let clients = []; // Store WebSocket clients
+const messages = []; // Store messages for chat retrieval
+const otps = {}; // Store OTPs
+const otpTimestamps = {}; // Store OTP timestamps
 
 // Function to create a unique room ID
 const generateRoomId = (user1, user2) => {
@@ -72,7 +75,11 @@ wss.on('connection', (ws) => {
                         type: 'message',
                         sender: currentUserId,
                         content: data.content,
+                        timestamp: new Date().toISOString(), // Add timestamp
                     };
+                    messages.push(messageData); // Store the message
+
+                    // Send message in JSON format to all clients in the room
                     rooms[currentRoomId].forEach(client => {
                         if (client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify(messageData));
@@ -137,8 +144,10 @@ app.post('/api/messages/send', (req, res) => {
         sender: senderId,
         receiver: receiverId,
         content,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(), // Ensuring the date is in ISO format
     };
+
+    messages.push(message); // Store the message
 
     // Broadcast message to WebSocket clients
     clients.forEach(client => {
@@ -191,3 +200,8 @@ app.post('/chat', async (req, res) => {
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+// Helper function to generate OTP
+const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // Generate a random 6-digit OTP
+};
