@@ -2,7 +2,6 @@ const express = require('express');
 const Message = require('../models/Messages');
 const router = express.Router();
 
-// Send a message
 router.post('/send', async (req, res) => {
     const { senderId, receiverId, content } = req.body;
     const message = new Message({ senderId, receiverId, content });
@@ -14,7 +13,6 @@ router.post('/send', async (req, res) => {
     }
 });
 
-// Get messages between two users
 router.get('/chat/:userId1/:userId2', async (req, res) => {
     const { userId1, userId2 } = req.params;
     try {
