@@ -70,7 +70,7 @@ export default function AIChat() {
                         value={message}
                         maxLength={200}
                         onChange={({ target: { value } }) => setMessage(value)}
-                        placeholder="Type your message here..."
+                        placeholder="Type your message here"
                         className="flex-grow h-10 border rounded p-2 text-white bg-gray-800 placeholder-gray-400"
                         aria-label="Message input"
                     />
