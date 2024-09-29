@@ -9,16 +9,13 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// Email transporter setup
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -27,10 +24,8 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// In-memory store for messages
 let messages = [];
 
-// Function to generate OTP
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -38,7 +33,6 @@ const generateOtp = () => {
 let otps = {};
 let otpTimestamps = {};
 
-// Endpoint to send OTP
 app.post('/send-otp', (req, res) => {
     const { email } = req.body;
 
@@ -59,7 +53,6 @@ app.post('/send-otp', (req, res) => {
     });
 });
 
-// Endpoint to send a message
 app.post('/api/messages/send', (req, res) => {
     const { senderId, receiverId, content } = req.body;
 
@@ -78,7 +71,6 @@ app.post('/api/messages/send', (req, res) => {
     return res.status(200).json(message);
 });
 
-// Endpoint to fetch messages between two users
 app.get('/api/messages/chat/:userId1/:userId2', (req, res) => {
     const { userId1, userId2 } = req.params;
 
@@ -91,7 +83,6 @@ app.get('/api/messages/chat/:userId1/:userId2', (req, res) => {
     return res.status(200).json(chatMessages);
 });
 
-// OpenAI API endpoint
 app.post('/chat', async (req, res) => {
     const { message } = req.body;
 
@@ -117,11 +108,9 @@ app.post('/chat', async (req, res) => {
     }
 });
 
-// Routes for authentication (if applicable)
 // const authRoutes = require('./routes/auth');
 // app.use('/api/auth', authRoutes);
 
-// Start the server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
