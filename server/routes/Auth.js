@@ -15,6 +15,4 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// You could add more authentication routes here (login, etc.)
-
 module.exports = router;
