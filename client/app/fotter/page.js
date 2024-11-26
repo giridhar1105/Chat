@@ -1,7 +1,7 @@
-export default function fotter () {
+export default function Footer() {
     return (
-        <div CclassName-text-center>
-        COPYWRITE - 2024
+        <div className="text-center py-4 bg-gray-200">
+            COPYRIGHT - 2024
         </div>
-    )
+    );
 }
