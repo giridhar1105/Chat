@@ -1,5 +1,7 @@
 export default function fotter () {
     return (
-        <div>Fotter</div>
+        <div CclassName-text-center>
+        COPYWRITE - 2024
+        </div>
     )
 }
